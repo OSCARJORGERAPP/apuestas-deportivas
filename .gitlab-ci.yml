@@ -1,0 +1,73 @@
+stages:
+  - install
+  - lint
+  - test
+  - build
+  - deploy
+
+variables:
+  NODE_VERSION: "18"
+
+install:
+  stage: install
+  image: node:18
+  script:
+    - npm ci
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1 day
+  cache:
+    paths:
+      - node_modules/
+
+lint:
+  stage: lint
+  image: node:18
+  dependencies:
+    - install
+  script:
+    - npm run lint
+  allow_failure: true
+
+test:
+  stage: test
+  image: node:18
+  dependencies:
+    - install
+  services:
+    - mongo:7
+  variables:
+    MONGODB_URI: "mongodb://mongo:27017/apuestas-test"
+    MAILHOG_HOST: "mailhog"
+    MAILHOG_PORT: "1025"
+  script:
+    - npm run test
+  artifacts:
+    paths:
+      - playwright-report/
+    expire_in: 30 days
+    when: always
+  allow_failure: true
+
+build:
+  stage: build
+  image: node:18
+  dependencies:
+    - install
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - .next/
+      - out/
+    expire_in: 30 days
+
+deploy:
+  stage: deploy
+  image: node:18
+  script:
+    - echo "Deploy placeholder - implementar según infraestructura"
+  only:
+    - main
+  when: manual
