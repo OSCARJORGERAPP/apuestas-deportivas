@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { seedTestData } from '../helpers.js';
 
 test.describe('Reseteos', () => {
   test.beforeEach(async ({ page, context }) => {
@@ -21,6 +22,9 @@ test.describe('Reseteos', () => {
   });
 
   test('debe resetear apuestas vía API', async ({ page }) => {
+    // Asegurar que hay datos en BD
+    await seedTestData();
+
     // Contar apuestas antes
     const antesRes = await page.evaluate(() =>
       fetch('/api/apuestas').then(r => r.json())

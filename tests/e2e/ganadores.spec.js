@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { seedTestData } from '../helpers.js';
 
 test.describe('Ganadores y distribución', () => {
   test('debe calcular ganadores correctamente después de establecer resultado', async ({ page, context }) => {
+    // Asegurar que hay datos en BD
+    await seedTestData();
+
     // Setup: loguear como admin
     await page.goto('/');
     const adminUser = { id: '507f1f77bcf86cd799439012', email: 'admin@example.com', role: 'admin' };

@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { seedTestData } from '../helpers.js';
 
 test.describe('Apuestas', () => {
   test('debe mostrar apuestas en landing', async ({ page }) => {
+    // Asegurar que hay datos en BD
+    await seedTestData();
+
     await page.goto('/');
 
     // Esperar a que las apuestas carguen usando locator

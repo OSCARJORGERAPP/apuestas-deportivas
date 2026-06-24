@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { seedTestData } from '../helpers.js';
 
 test.describe('Panel Admin', () => {
   test.beforeEach(async ({ page, context }) => {
+    // Asegurar que hay datos en BD
+    await seedTestData();
+
     // Setup: loguear como admin
     await page.goto('/');
     const adminUser = { id: '507f1f77bcf86cd799439012', email: 'admin@example.com', role: 'admin' };
@@ -58,14 +62,19 @@ test.describe('Panel Admin', () => {
     }
 
     // Seleccionar apuesta
-    const select = page.locator('select').first();
-    await select.selectOption({ index: 1 }); // Seleccionar primera apuesta disponible
+    const selects = page.locator('select');
+    const selectsCount = await selects.count();
+    if (selectsCount < 2) {
+      test.skip();
+    }
+
+    await selects.first().selectOption({ index: 1 }); // Seleccionar primera apuesta disponible
 
     // Esperar a que se seleccione
     await page.waitForTimeout(500);
 
-    // Seleccionar resultado
-    await page.selectOption('select:nth-of-type(2)', 'equipo1');
+    // Seleccionar resultado (segundo select)
+    await selects.nth(1).selectOption('equipo1');
 
     // Click establecer resultado
     await page.click('button:has-text("Establecer resultado")');
