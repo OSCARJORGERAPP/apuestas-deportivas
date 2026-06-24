@@ -1,6 +1,7 @@
 {
   "name": "apuestas-deportivas",
   "version": "1.0.0",
+  "type": "module",
   "description": "SaaS de apuestas deportivas con magic link auth, MongoDB nativo y REDSYS",
   "scripts": {
     "dev": "next dev",
@@ -12,11 +13,13 @@
     "test:debug": "playwright test --debug",
     "seed": "node scripts/seed.js",
     "seed:reset": "node scripts/seed-reset.js",
-    "db:setup": "node scripts/db-setup.js"
+    "db:setup": "node scripts/db-setup.js",
+    "create:admin": "node scripts/create-admin.js"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.1",
     "autoprefixer": "latest",
+    "dotenv": "^17.4.2",
     "jsonwebtoken": "latest",
     "mongodb": "latest",
     "next": "latest",
@@ -27,6 +30,7 @@
   },
   "devDependencies": {
     "@playwright/test": "latest",
+    "daisyui": "^5.5.23",
     "eslint": "latest",
     "eslint-config-next": "latest",
     "postcss": "latest"

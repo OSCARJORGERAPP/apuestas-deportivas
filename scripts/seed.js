@@ -1,5 +1,8 @@
+import dotenv from 'dotenv';
 import { connectToDatabase } from '../src/lib/db.js';
 import { ObjectId } from 'mongodb';
+
+dotenv.config();
 
 async function seedDatabase() {
   const { db } = await connectToDatabase();
@@ -15,7 +18,7 @@ async function seedDatabase() {
     ];
 
     const participantesRes = await db.collection('participantes').insertMany(participantes);
-    const participanteIds = Object.values(participantesRes.insertedIds);
+    const participanteIds = Object.values(participantesRes.insertedIds).map(id => new ObjectId(id));
     console.log(`✓ ${participantes.length} participantes creados`);
 
     // Apuestas
@@ -50,7 +53,7 @@ async function seedDatabase() {
     ];
 
     const apuestasRes = await db.collection('apuestas').insertMany(apuestas);
-    const apuestasIds = Object.values(apuestasRes.insertedIds);
+    const apuestasIds = Object.values(apuestasRes.insertedIds).map(id => new ObjectId(id));
     console.log(`✓ ${apuestas.length} apuestas creadas`);
 
     // Valores apostados (cada participante apuesta en algunas apuestas)

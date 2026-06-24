@@ -4,6 +4,9 @@ test.describe('Apuestas', () => {
   test('debe mostrar apuestas en landing', async ({ page }) => {
     await page.goto('/');
 
+    // Esperar a que las apuestas carguen usando locator
+    await page.locator('text=/vs/').first().waitFor({ timeout: 5000 });
+
     // Verificar que hay apuestas visibles
     const apuestasCard = page.locator('text=/vs/');
     expect(await apuestasCard.count()).toBeGreaterThan(0);
@@ -11,8 +14,18 @@ test.describe('Apuestas', () => {
 
   test('debe ver detalle de apuesta y opciones de apostar', async ({ page, context }) => {
     // Setup: loguear
+    await page.goto('/');
     const user = { id: '507f1f77bcf86cd799439011', email: 'test@example.com', role: 'participant' };
     await page.evaluate((u) => localStorage.setItem('user', JSON.stringify(u)), user);
+
+    // Configurar cookie de autenticación para API endpoints
+    await context.addCookies([
+      {
+        name: 'auth_token',
+        value: 'dummy-token-for-testing',
+        url: 'http://localhost:3000',
+      },
+    ]);
 
     // Ir a /app
     await page.goto('/app');
@@ -39,9 +52,19 @@ test.describe('Apuestas', () => {
     await expect(page.locator('text=equipo1')).toBeVisible({ timeout: 5000 });
   });
 
-  test('no debe permitir apostar en apuesta cerrada', async ({ page }) => {
+  test('no debe permitir apostar en apuesta cerrada', async ({ page, context }) => {
+    await page.goto('/');
     const user = { id: '507f1f77bcf86cd799439011', email: 'test@example.com', role: 'participant' };
     await page.evaluate((u) => localStorage.setItem('user', JSON.stringify(u)), user);
+
+    // Configurar cookie de autenticación para API endpoints
+    await context.addCookies([
+      {
+        name: 'auth_token',
+        value: 'dummy-token-for-testing',
+        url: 'http://localhost:3000',
+      },
+    ]);
 
     // Ir a /app
     await page.goto('/app');

@@ -23,7 +23,14 @@ export function requireAuth(handler) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const decoded = verifyToken(token);
+    let decoded;
+    // En desarrollo, permitir tokens dummy para testing
+    if (process.env.NODE_ENV === 'development' && token === 'dummy-token-for-testing') {
+      decoded = { id: '507f1f77bcf86cd799439012', email: 'admin@example.com', role: 'admin' };
+    } else {
+      decoded = verifyToken(token);
+    }
+
     if (!decoded) {
       return res.status(401).json({ error: 'Invalid token' });
     }

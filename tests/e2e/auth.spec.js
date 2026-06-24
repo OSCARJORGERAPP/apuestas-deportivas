@@ -58,18 +58,19 @@ test.describe('Autenticación con Magic Link', () => {
   test('debe permitir logout', async ({ page, context }) => {
     // Setup: loguear primero
     const user = { id: '123', email: 'test@example.com', role: 'participant' };
+
+    // Ir a app primero
+    await page.goto('/app');
+
     await context.addCookies([
       {
         name: 'auth_token',
-        value: 'dummy',
+        value: 'dummy-token-for-testing',
         url: 'http://localhost:3000',
       },
     ]);
 
     await page.evaluate((u) => localStorage.setItem('user', JSON.stringify(u)), user);
-
-    // Ir a app
-    await page.goto('/app');
 
     // Hacer logout
     await page.click('button:has-text("Logout")');

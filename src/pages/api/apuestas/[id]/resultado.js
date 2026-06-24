@@ -30,6 +30,10 @@ async function setResultado(req, res) {
       return res.status(404).json({ error: 'Apuesta no encontrada' });
     }
 
+    if (apuesta.resultado) {
+      return res.status(400).json({ error: 'Resultado ya establecido para esta apuesta' });
+    }
+
     // Obtener todos los valores apostados
     const valoresApostados = await db
       .collection('valores_apostados')
@@ -39,31 +43,32 @@ async function setResultado(req, res) {
     // Calcular ganadores y distribución
     const ganadores = [];
     let totalRecaudacion = 0;
-    let conteoGanadores = 0;
+    const ganadoresArray = [];
 
     for (const valor of valoresApostados) {
       totalRecaudacion += valor.valor_apostado;
 
       if (valor.prediccion === resultado) {
-        conteoGanadores++;
+        ganadoresArray.push(valor);
       }
     }
 
-    // Si hay ganadores, calcular proporción
-    if (conteoGanadores > 0) {
-      const valorPorGanador = totalRecaudacion / conteoGanadores;
+    // Si hay ganadores, distribución proporcional a lo apostado
+    if (ganadoresArray.length > 0) {
+      const totalApostadoPorGanadores = ganadoresArray.reduce((sum, v) => sum + v.valor_apostado, 0);
 
-      for (const valor of valoresApostados) {
-        if (valor.prediccion === resultado) {
-          const ganador = {
-            id_apuesta: apuestaId,
-            id_participante: valor.id_participante,
-            valor_ganado: valorPorGanador,
-          };
+      for (const valor of ganadoresArray) {
+        const proporcion = valor.valor_apostado / totalApostadoPorGanadores;
+        const valorGanado = totalRecaudacion * proporcion;
 
-          await db.collection('ganadores').insertOne(ganador);
-          ganadores.push(ganador);
-        }
+        const ganador = {
+          id_apuesta: apuestaId,
+          id_participante: valor.id_participante,
+          valor_ganado: valorGanado,
+        };
+
+        await db.collection('ganadores').insertOne(ganador);
+        ganadores.push(ganador);
       }
     }
 

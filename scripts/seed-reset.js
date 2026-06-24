@@ -1,4 +1,7 @@
+import dotenv from 'dotenv';
 import { connectToDatabase } from '../src/lib/db.js';
+
+dotenv.config();
 
 async function resetDatabase() {
   const { db } = await connectToDatabase();

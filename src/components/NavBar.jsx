@@ -7,7 +7,6 @@ export default function NavBar() {
   const router = useRouter();
 
   useEffect(() => {
-    // Recuperar usuario de localStorage
     const stored = localStorage.getItem('user');
     if (stored) {
       setUser(JSON.parse(stored));
@@ -22,33 +21,36 @@ export default function NavBar() {
   };
 
   return (
-    <nav className="bg-dark-900 border-b border-dark-700 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-primary hover:text-dark-300">
+    <nav className="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
+      <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+        <Link href="/" className="text-2xl font-bold text-white hover:text-gray-300">
           🎯 Apuestas
         </Link>
 
-        <div className="flex gap-6 items-center">
+        <div className="flex gap-4 items-center">
           {user ? (
             <>
-              <span className="text-secondary text-sm">{user.email}</span>
+              <span className="text-gray-400 text-sm hidden md:inline">{user.email}</span>
               {user.role === 'admin' && (
-                <Link href="/admin" className="text-primary hover:text-dark-300 transition">
+                <Link href="/admin" className="text-gray-300 hover:text-white transition">
                   Admin
                 </Link>
               )}
-              <Link href="/app" className="text-primary hover:text-dark-300 transition">
+              <Link href="/app" className="text-gray-300 hover:text-white transition">
                 Dashboard
               </Link>
               <button
                 onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-primary transition"
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full transition"
               >
                 Logout
               </button>
             </>
           ) : (
-            <Link href="/login" className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-primary transition">
+            <Link
+              href="/login"
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full transition"
+            >
               Participar
             </Link>
           )}

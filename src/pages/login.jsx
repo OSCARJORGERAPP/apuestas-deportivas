@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { useRouter } from 'next/router';
+import Link from 'next/link';
+import Button from '../components/Button';
+import Input from '../components/Input';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,39 +36,51 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-950 flex items-center justify-center px-4">
-      <div className="bg-dark-800 border border-dark-700 rounded-lg p-8 w-full max-w-md">
-        <h1 className="text-3xl font-bold text-primary mb-2">Bienvenido</h1>
-        <p className="text-secondary mb-8">Accede con tu email</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 py-8">
+      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md border border-gray-200">
+        <div className="mb-8">
+          <Link href="/" className="text-2xl font-bold text-blue-600 block mb-2">
+            ⚽ Apuestas
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">Bienvenido</h1>
+          <p className="text-gray-600 text-sm mt-1">Accede con tu email</p>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-secondary text-sm mb-2">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
-              className="w-full bg-dark-900 border border-dark-600 rounded px-4 py-2 text-primary placeholder-dark-500 focus:border-blue-500 focus:outline-none"
-              required
-              disabled={loading}
-            />
-          </div>
-
-          {message && <p className="text-green-400 text-sm">{message}</p>}
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-
-          <button
-            type="submit"
+          <Input
+            type="email"
+            label="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="tu@email.com"
+            required
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 px-4 py-2 rounded text-primary font-semibold transition"
+          />
+
+          {message && (
+            <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg text-sm">
+              {message}
+            </div>
+          )}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            variant="primary"
+            size="md"
+            className="w-full"
+            disabled={loading}
           >
             {loading ? 'Enviando...' : 'Enviar magic link'}
-          </button>
+          </Button>
         </form>
 
-        <p className="text-secondary text-xs mt-6 text-center">
-          MailHog en dev: <a href="http://localhost:8025" target="_blank" rel="noopener noreferrer" className="text-blue-400">localhost:8025</a>
+        <p className="text-gray-500 text-xs mt-6 text-center">
+          Testing: <a href="http://localhost:8025" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 font-medium">ver emails</a>
         </p>
       </div>
     </div>

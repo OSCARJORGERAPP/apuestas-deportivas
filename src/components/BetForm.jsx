@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import Button from './Button';
+import Input from './Input';
 
 export default function BetForm({ apuesta, participantId, onSuccess }) {
   const [formData, setFormData] = useState({
-    valor_apostado: '',
     prediccion: 'equipo1',
   });
   const [loading, setLoading] = useState(false);
@@ -24,10 +25,10 @@ export default function BetForm({ apuesta, participantId, onSuccess }) {
       const res = await fetch('/api/valores', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           id_participante: participantId,
           id_apuesta: apuesta._id,
-          valor_apostado: parseFloat(formData.valor_apostado),
           prediccion: formData.prediccion,
         }),
       });
@@ -36,7 +37,7 @@ export default function BetForm({ apuesta, participantId, onSuccess }) {
         throw new Error('Error registrando apuesta');
       }
 
-      setFormData({ valor_apostado: '', prediccion: 'equipo1' });
+      setFormData({ prediccion: 'equipo1' });
       if (onSuccess) onSuccess();
     } catch (err) {
       setError(err.message);
@@ -46,69 +47,49 @@ export default function BetForm({ apuesta, participantId, onSuccess }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-dark-800 border border-dark-700 rounded-lg p-6 space-y-4">
-      <h3 className="text-lg font-bold text-primary">Apuesta por:</h3>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <h3 className="text-lg font-bold text-gray-900 mb-6">Elige tu predicción</h3>
 
-      <div className="grid grid-cols-3 gap-2">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="radio"
-            name="prediccion"
-            value="equipo1"
-            checked={formData.prediccion === 'equipo1'}
-            onChange={handleChange}
-            className="w-4 h-4"
-          />
-          <span className="text-primary">{apuesta.equipo1}</span>
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="radio"
-            name="prediccion"
-            value="empate"
-            checked={formData.prediccion === 'empate'}
-            onChange={handleChange}
-            className="w-4 h-4"
-          />
-          <span className="text-primary">Empate</span>
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="radio"
-            name="prediccion"
-            value="equipo2"
-            checked={formData.prediccion === 'equipo2'}
-            onChange={handleChange}
-            className="w-4 h-4"
-          />
-          <span className="text-primary">{apuesta.equipo2}</span>
-        </label>
+      <div className="space-y-3">
+        {[
+          { value: 'equipo1', label: apuesta.equipo1 },
+          { value: 'empate', label: 'Empate' },
+          { value: 'equipo2', label: apuesta.equipo2 },
+        ].map((option) => (
+          <label key={option.value} className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 border border-gray-200">
+            <input
+              type="radio"
+              name="prediccion"
+              value={option.value}
+              checked={formData.prediccion === option.value}
+              onChange={handleChange}
+              className="w-4 h-4 cursor-pointer"
+            />
+            <span className="font-medium text-gray-700">{option.label}</span>
+          </label>
+        ))}
       </div>
 
-      <div>
-        <label className="block text-secondary text-sm mb-2">Monto a apostar</label>
-        <input
-          type="number"
-          name="valor_apostado"
-          value={formData.valor_apostado}
-          onChange={handleChange}
-          placeholder="50"
-          step="0.01"
-          min="1"
-          className="w-full bg-dark-900 border border-dark-600 rounded px-3 py-2 text-primary placeholder-dark-500 focus:border-blue-500 focus:outline-none"
-          required
-        />
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p className="text-sm text-blue-600">Monto a apostar</p>
+        <p className="text-2xl font-bold text-blue-900">${apuesta.valor}</p>
       </div>
 
-      {error && <p className="text-red-400 text-sm">{error}</p>}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
 
-      <button
+      <Button
         type="submit"
+        variant={apuesta.estado === 'abierta' ? 'primary' : 'secondary'}
+        size="md"
+        className="w-full"
         disabled={loading || apuesta.estado !== 'abierta'}
-        className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-700 px-4 py-2 rounded text-primary font-semibold transition"
       >
-        {loading ? 'Procesando...' : 'Apostar'}
-      </button>
+        {loading ? 'Procesando...' : apuesta.estado === 'abierta' ? 'Apostar' : 'Apuesta cerrada'}
+      </Button>
     </form>
   );
 }

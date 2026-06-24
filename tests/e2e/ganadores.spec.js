@@ -1,10 +1,20 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Ganadores y distribución', () => {
-  test('debe calcular ganadores correctamente después de establecer resultado', async ({ page }) => {
+  test('debe calcular ganadores correctamente después de establecer resultado', async ({ page, context }) => {
     // Setup: loguear como admin
+    await page.goto('/');
     const adminUser = { id: '507f1f77bcf86cd799439012', email: 'admin@example.com', role: 'admin' };
     await page.evaluate((u) => localStorage.setItem('user', JSON.stringify(u)), adminUser);
+
+    // Configurar cookie de autenticación para API endpoints
+    await context.addCookies([
+      {
+        name: 'auth_token',
+        value: 'dummy-token-for-testing',
+        url: 'http://localhost:3000',
+      },
+    ]);
 
     // 1. Obtener apuestas actuales vía API
     const apuestasRes = await page.evaluate(() =>
@@ -19,7 +29,7 @@ test.describe('Ganadores y distribución', () => {
 
     // 2. Obtener valores apostados para esa apuesta
     const valoresRes = await page.evaluate((apuestaId) =>
-      fetch('/api/valores').then(r => r.json()).then(v => v.filter(val => val.id_apuesta === apuestaId))
+      fetch('/api/valores', { credentials: 'include' }).then(r => r.json()).then(v => Array.isArray(v) ? v.filter(val => val.id_apuesta === apuestaId) : [])
     , primeraApuesta._id);
 
     if (valoresRes.length === 0) {
@@ -63,10 +73,20 @@ test.describe('Ganadores y distribución', () => {
     }
   });
 
-  test('debe mostrar ganancias en dashboard del participante', async ({ page }) => {
+  test('debe mostrar ganancias en dashboard del participante', async ({ page, context }) => {
     // Setup: loguear como participante
+    await page.goto('/');
     const user = { id: '507f1f77bcf86cd799439011', email: 'participante@example.com', role: 'participant' };
     await page.evaluate((u) => localStorage.setItem('user', JSON.stringify(u)), user);
+
+    // Configurar cookie de autenticación para API endpoints
+    await context.addCookies([
+      {
+        name: 'auth_token',
+        value: 'dummy-token-for-testing',
+        url: 'http://localhost:3000',
+      },
+    ]);
 
     await page.goto('/app');
 

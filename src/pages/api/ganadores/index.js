@@ -19,7 +19,18 @@ async function getGanadores(req, res) {
   const { db } = await connectToDatabase();
 
   try {
-    const ganadores = await db.collection('ganadores').find({}).toArray();
+    const userId = req.user?.participantId || req.user?.id;
+    const userRole = req.user?.role;
+    if (!userId) {
+      return res.status(401).json({ error: 'No autorizado' });
+    }
+
+    const { ObjectId } = await import('mongodb');
+    let query = { id_participante: new ObjectId(userId) };
+    if (userRole === 'admin') {
+      query = {};
+    }
+    const ganadores = await db.collection('ganadores').find(query).toArray();
     return res.status(200).json(ganadores);
   } catch (error) {
     console.error('Error fetching ganadores:', error);

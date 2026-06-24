@@ -18,8 +18,8 @@ cd apuestas-deportivas
 # Instalar dependencias
 npm install
 
-# Copiar template de variables
-cp .env.example .env
+# Copiar template de variables (si no existe)
+cp .env.example .env 2>/dev/null || echo ".env ya existe"
 # (Ya tiene valores por defecto para dev local)
 ```
 
@@ -150,6 +150,19 @@ O desde panel admin (`/admin`):
 | `http://localhost:3000/admin` | Admin panel (protegido, solo admin) |
 | `http://localhost:8025/` | MailHog - captura de emails |
 | `http://localhost:27017/` | MongoDB (no tiene UI) |
+
+## 🔧 Notas Importantes
+
+### dotenv en src/lib/db.js
+El archivo `src/lib/db.js` importa `dotenv` para cargar variables de entorno. Esto es necesario para los scripts de setup que se ejecutan fuera del contexto de Next.js.
+
+### Admin Role Setup
+Para acceder al panel admin, necesitas un usuario con role `admin`. El quickstart explica cómo hacerlo manualmente via localStorage en DevTools.
+
+### Endpoints con Role-Based Access
+Algunos endpoints devuelven datos diferentes según el rol del usuario:
+- `/api/valores`: Admin ve todos, usuario regular solo ve los suyos
+- `/api/ganadores`: Admin ve todos, usuario regular solo ve los suyos
 
 ## ⚠️ Troubleshooting
 

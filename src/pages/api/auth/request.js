@@ -36,11 +36,11 @@ export default async function handler(req, res) {
       participant = { _id: result.insertedId, mail: email, nombre: email.split('@')[0] };
     }
 
-    // Generar token
+    // Generar token con el role del participante
     const token = generateToken({
       participantId: participant._id.toString(),
       email: participant.mail,
-      role: 'participant',
+      role: participant.role || 'participant',
     });
 
     // Enviar email con magic link

@@ -1,4 +1,7 @@
+import { config } from 'dotenv';
 import { MongoClient } from 'mongodb';
+
+config();
 
 let cachedClient = null;
 let cachedDb = null;

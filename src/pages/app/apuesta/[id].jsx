@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Layout from '../../../components/Layout';
 import BetForm from '../../../components/BetForm';
-import StatsTable from '../../../components/StatsTable';
+import Card from '../../../components/Card';
+import StatsBox from '../../../components/StatsBox';
+import Button from '../../../components/Button';
 
 export default function ApuestaDetail() {
   const [user, setUser] = useState(null);
@@ -25,8 +28,8 @@ export default function ApuestaDetail() {
     const fetchData = async () => {
       try {
         const [apuestaRes, valoresRes] = await Promise.all([
-          fetch(`/api/apuestas/${id}`),
-          fetch('/api/valores'),
+          fetch(`/api/apuestas/${id}`, { credentials: 'include' }),
+          fetch('/api/valores', { credentials: 'include' }),
         ]);
 
         if (apuestaRes.ok) {
@@ -47,69 +50,101 @@ export default function ApuestaDetail() {
     fetchData();
   }, [id, router]);
 
-  if (!user || loading || !apuesta) {
-    return <div className="text-center py-20 text-secondary">Cargando apuesta...</div>;
+  if (loading || !apuesta) {
+    return (
+      <Layout>
+        <div className="text-center py-20">Cargando apuesta...</div>
+      </Layout>
+    );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <button
-        onClick={() => router.back()}
-        className="text-blue-400 hover:text-blue-300 mb-6"
-      >
-        ← Volver
-      </button>
+    <Layout>
+      <div className="space-y-8">
+        <button
+          onClick={() => router.back()}
+          className="text-blue-600 hover:text-blue-700 font-medium transition"
+        >
+          ← Volver
+        </button>
 
-      {/* Header */}
-      <div className="bg-dark-800 border border-dark-700 rounded-lg p-8 mb-8">
-        <h1 className="text-4xl font-bold text-primary mb-4">
-          {apuesta.equipo1} <span className="text-secondary">vs</span> {apuesta.equipo2}
-        </h1>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
-          <div>
-            <p className="text-secondary text-sm mb-2">Valor de apuesta</p>
-            <p className="text-2xl font-bold text-primary">${apuesta.valor}</p>
-          </div>
-          <div>
-            <p className="text-secondary text-sm mb-2">Recaudación total</p>
-            <p className="text-2xl font-bold text-primary">${apuesta.recaudacion_total}</p>
-          </div>
-          <div>
-            <p className="text-secondary text-sm mb-2">Participantes</p>
-            <p className="text-2xl font-bold text-primary">{valores.length}</p>
-          </div>
-          <div>
-            <p className="text-secondary text-sm mb-2">Estado</p>
-            <p className={`text-2xl font-bold ${apuesta.estado === 'abierta' ? 'text-green-400' : 'text-gray-500'}`}>
-              {apuesta.estado}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Bet Form */}
+        {/* Header */}
         <div>
-          <BetForm
-            apuesta={apuesta}
-            participantId={user.id}
-            onSuccess={() => router.replace(router.asPath)}
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            {apuesta.equipo1} vs {apuesta.equipo2}
+          </h1>
+          <p className="text-gray-600">Detalles de la apuesta</p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatsBox
+            title="Valor inicial"
+            value={`$${apuesta.valor}`}
+            color="blue"
+            icon="⚽"
+          />
+          <StatsBox
+            title="Recaudación"
+            value={`$${apuesta.recaudacion_total}`}
+            color="green"
+            icon="💰"
+          />
+          <StatsBox
+            title="Participantes"
+            value={valores.length}
+            color="blue"
+            icon="👥"
+          />
+          <StatsBox
+            title="Estado"
+            value={apuesta.estado}
+            color={apuesta.estado === 'abierta' ? 'green' : 'gray'}
+            icon="📊"
           />
         </div>
 
-        {/* Valores apostados */}
-        <div className="lg:col-span-2">
-          <StatsTable
-            title={`Apuestas registradas (${valores.length})`}
-            headers={['Predicción', 'Monto']}
-            rows={valores.map((v) => ({
-              prediccion: v.prediccion,
-              monto: `$${v.valor_apostado}`,
-            }))}
-          />
+        {/* Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Bet Form */}
+          <Card className="lg:col-span-1 h-fit">
+            <BetForm
+              apuesta={apuesta}
+              participantId={user.id}
+              onSuccess={() => router.replace(router.asPath)}
+            />
+          </Card>
+
+          {/* Valores apostados */}
+          <Card className="lg:col-span-3">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-6">Apuestas registradas ({valores.length})</h3>
+              {valores.length === 0 ? (
+                <p className="text-gray-600 text-center py-8">Sin apuestas aún</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Predicción</th>
+                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">Monto</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {valores.map((v) => (
+                        <tr key={v._id} className="hover:bg-gray-50">
+                          <td className="py-3 px-4 text-sm text-gray-700 capitalize font-medium">{v.prediccion}</td>
+                          <td className="py-3 px-4 text-sm text-right text-gray-900 font-semibold">${v.valor_apostado}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </Card>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }

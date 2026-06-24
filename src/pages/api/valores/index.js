@@ -22,9 +22,14 @@ async function handler(req, res) {
 
 async function getValores(req, res) {
   const { db } = await connectToDatabase();
+  const { participantId, role } = req.user;
 
   try {
-    const valores = await db.collection('valores_apostados').find({}).toArray();
+    let query = {};
+    if (role !== 'admin') {
+      query = { id_participante: new ObjectId(participantId) };
+    }
+    const valores = await db.collection('valores_apostados').find(query).toArray();
     return res.status(200).json(valores);
   } catch (error) {
     console.error('Error fetching valores:', error);
@@ -34,9 +39,9 @@ async function getValores(req, res) {
 
 async function createValor(req, res) {
   const { db } = await connectToDatabase();
-  const { id_participante, id_apuesta, valor_apostado, prediccion } = req.body;
+  const { id_participante, id_apuesta, prediccion } = req.body;
 
-  if (!id_participante || !id_apuesta || !valor_apostado || !prediccion) {
+  if (!id_participante || !id_apuesta || !prediccion) {
     return res.status(400).json({ error: 'Datos incompletos' });
   }
 
@@ -45,6 +50,24 @@ async function createValor(req, res) {
   }
 
   try {
+    // Obtener apuesta y su valor fijo
+    const apuesta = await db.collection('apuestas').findOne({ _id: new ObjectId(id_apuesta) });
+    if (!apuesta) {
+      return res.status(404).json({ error: 'Apuesta no encontrada' });
+    }
+
+    // Prevenir duplicados: verificar si el usuario ya apostó en esta apuesta
+    const existente = await db.collection('valores_apostados').findOne({
+      id_participante: new ObjectId(id_participante),
+      id_apuesta: new ObjectId(id_apuesta),
+    });
+
+    if (existente) {
+      return res.status(400).json({ error: 'Ya apostaste en esta apuesta' });
+    }
+
+    const valor_apostado = apuesta.valor;
+
     const result = await db.collection('valores_apostados').insertOne({
       id_participante: new ObjectId(id_participante),
       id_apuesta: new ObjectId(id_apuesta),
