@@ -121,6 +121,23 @@ npm run test:ui
 npm run test:debug
 ```
 
+### Estado actual de tests (9/17 pasando)
+✅ **Pasando:**
+- Panel Admin › debe permitir crear apuesta
+- Panel Admin › debe permitir resetear colecciones
+- Apuestas › no debe permitir apostar en apuesta cerrada
+- Auth › debe rechazar token inválido
+- Auth › debe permitir logout
+- Ganadores › debe mostrar ganancias en dashboard del participante
+- Reseteos › debe resetear participantes vía API
+- Reseteos › debe resetear valores apostados vía API
+- Reseteos › debe resetear ganadores vía API
+
+⚠️ **Problemas pendientes:**
+- Tests que requieren datos en BD (apuestas, participantes) pueden fallar si se ejecutan en cierto orden
+- Magic Link test requiere integración correcta con MailHog
+- Algunos selectores de elementos necesitan ajustes
+
 ## 📊 Lint y Build
 
 ```bash
