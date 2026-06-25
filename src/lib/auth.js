@@ -26,7 +26,13 @@ export function requireAuth(handler) {
     let decoded;
     // En desarrollo, permitir tokens dummy para testing
     if (process.env.NODE_ENV === 'development' && token === 'dummy-token-for-testing') {
-      decoded = { id: '507f1f77bcf86cd799439012', email: 'admin@example.com', role: 'admin' };
+      // Token dummy incluye participantId para que los endpoints lo encuentren
+      decoded = {
+        participantId: '507f1f77bcf86cd799439011',
+        id: '507f1f77bcf86cd799439012',
+        email: 'admin@example.com',
+        role: 'admin'
+      };
     } else {
       decoded = verifyToken(token);
     }
