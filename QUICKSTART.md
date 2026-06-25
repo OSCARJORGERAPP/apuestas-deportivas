@@ -95,13 +95,17 @@ Verás:
 
 1. Abre DevTools (F12) → Console
 2. El navegador pedirá seguridad - escribe: `allow pasting` y presiona **Enter**
-3. Copia y pega este código:
+3. Copia y pega este código (configura tanto localStorage como cookie):
    ```javascript
+   // Configurar usuario en localStorage
    localStorage.setItem('user', JSON.stringify({
      id: '507f1f77bcf86cd799439012',
      email: 'admin@test.com',
      role: 'admin'
-   }))
+   }));
+   
+   // Configurar cookie de autenticación
+   document.cookie = 'auth_token=dummy-token-for-testing; path=/; max-age=86400';
    ```
 4. Presiona **Enter** para ejecutar
 5. **⚠️ IMPORTANTE:** Presiona `Ctrl+R` (o `Cmd+R` en Mac) para **RECARGAR la página**
