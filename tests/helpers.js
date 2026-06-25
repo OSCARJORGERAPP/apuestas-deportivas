@@ -86,18 +86,23 @@ export async function cleanTestData() {
 export async function getMailhogEmail(toEmail, maxRetries = 10) {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const response = await fetch(
-        `http://localhost:8025/api/v2/search?limit=50&kind=to&query=${encodeURIComponent(toEmail)}`
-      );
+      // Usar el endpoint /api/v2/messages en lugar de search
+      const response = await fetch(`http://localhost:8025/api/v2/messages?limit=100`);
       if (!response.ok) throw new Error(`Status ${response.status}`);
 
       const data = await response.json();
       if (data.items && data.items.length > 0) {
-        return data.items[0];
+        // Buscar el email más reciente que contiene el toEmail
+        const email = data.items.find(e =>
+          e.To?.some(t => t.includes(toEmail))
+        );
+        if (email) {
+          return email;
+        }
       }
     } catch (error) {
       if (i < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 500));
         continue;
       }
     }
