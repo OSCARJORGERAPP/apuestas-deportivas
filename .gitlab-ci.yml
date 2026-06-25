@@ -36,8 +36,10 @@ test:
     - mongo:7
   variables:
     MONGODB_URI: "mongodb://mongo:27017/apuestas-test"
+    JWT_SECRET: "test-secret-key-for-ci-do-not-use-in-production"
     MAILHOG_HOST: "mailhog"
     MAILHOG_PORT: "1025"
+    NODE_ENV: "test"
   script:
     - npm ci
     - npm run test
