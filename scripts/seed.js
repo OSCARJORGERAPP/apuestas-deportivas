@@ -74,6 +74,21 @@ async function seedDatabase() {
     await db.collection('valores_apostados').insertMany(valoresApostados);
     console.log(`✓ ${valoresApostados.length} valores apostados creados`);
 
+    // Calcular recaudación total por apuesta
+    for (const apuestaId of apuestasIds) {
+      const total = await db.collection('valores_apostados').aggregate([
+        { $match: { id_apuesta: apuestaId } },
+        { $group: { _id: null, total: { $sum: '$valor_apostado' } } }
+      ]).toArray();
+
+      const recaudacion = total.length > 0 ? total[0].total : 0;
+      await db.collection('apuestas').updateOne(
+        { _id: apuestaId },
+        { $set: { recaudacion_total: recaudacion } }
+      );
+    }
+    console.log('✓ Recaudaciones calculadas');
+
     console.log('\n✅ Seed completado');
     process.exit(0);
   } catch (error) {
