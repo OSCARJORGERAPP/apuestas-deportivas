@@ -86,23 +86,28 @@ export async function cleanTestData() {
 export async function getMailhogEmail(toEmail, maxRetries = 10) {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      // Usar el endpoint /api/v2/messages en lugar de search
+      // Usar el endpoint /api/v2/messages
       const response = await fetch(`http://localhost:8025/api/v2/messages?limit=100`);
       if (!response.ok) throw new Error(`Status ${response.status}`);
 
       const data = await response.json();
       if (data.items && data.items.length > 0) {
         // Buscar el email más reciente que contiene el toEmail
-        const email = data.items.find(e =>
-          e.To?.some(t => t.includes(toEmail))
-        );
+        // items[0] es el más reciente
+        const email = data.items.find(e => {
+          const toAddresses = e.To || [];
+          return toAddresses.some(t => {
+            const emailStr = `${t.Mailbox}@${t.Domain}`;
+            return emailStr.includes(toEmail) || t.Mailbox === toEmail.split('@')[0];
+          });
+        });
         if (email) {
           return email;
         }
       }
     } catch (error) {
       if (i < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 300));
         continue;
       }
     }
@@ -111,11 +116,25 @@ export async function getMailhogEmail(toEmail, maxRetries = 10) {
 }
 
 export function extractTokenFromEmail(emailData) {
-  if (!emailData || !emailData.Raw || !emailData.Raw.Data) {
+  if (!emailData) {
     return null;
   }
-  // JWT tokens tienen 3 partes separadas por puntos: header.payload.signature
-  // Buscar el token en el formato token=...
-  const tokenMatch = emailData.Raw.Data.match(/token=([a-zA-Z0-9._\-]+(?:\.[a-zA-Z0-9._\-]+)*)/);
-  return tokenMatch ? tokenMatch[1] : null;
+
+  // El Body contiene HTML con el token en quoted-printable encoding
+  let bodyText = emailData.Content?.Body || '';
+
+  // Remover soft line breaks (= al final de línea en quoted-printable)
+  bodyText = bodyText.replace(/=\r?\n/g, '');
+
+  // Buscar patrones JWT: eyJ...eyJ... (tres partes separadas por puntos)
+  // Los JWTs empiezan típicamente con "eyJ" (base64 para "{")
+  // Buscar: eyJ seguido de caracteres, punto, más caracteres, punto, más caracteres
+  const jwtPatterns = bodyText.match(/eyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+/g);
+
+  if (jwtPatterns && jwtPatterns.length > 0) {
+    // Tomar el último JWT encontrado (más probable que sea el actual)
+    return jwtPatterns[jwtPatterns.length - 1];
+  }
+
+  return null;
 }

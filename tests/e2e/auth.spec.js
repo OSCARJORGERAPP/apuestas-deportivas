@@ -21,6 +21,7 @@ test.describe('Autenticación con Magic Link', () => {
     if (email) {
       // Extraer token del email
       const token = extractTokenFromEmail(email);
+
       if (token) {
         // 5. Verificar token
         await page.goto(`/auth/verify?token=${token}`);
