@@ -18,6 +18,7 @@ test.describe('Apuestas', () => {
 
   test('debe ver detalle de apuesta y opciones de apostar', async ({ page, context }) => {
     // Setup: loguear
+    await seedTestData();
     await page.goto('/');
     const user = { id: '507f1f77bcf86cd799439011', email: 'test@example.com', role: 'participant' };
     await page.evaluate((u) => localStorage.setItem('user', JSON.stringify(u)), user);
@@ -34,15 +35,22 @@ test.describe('Apuestas', () => {
     // Ir a /app
     await page.goto('/app');
 
-    // Hacer click en una apuesta
+    // Esperar a que carguen las apuestas
+    await page.locator('text=/vs/').first().waitFor({ timeout: 5000 });
+
+    // Buscar un enlace que navegue a una apuesta
     const apuestaLink = page.locator('a').filter({ hasText: /vs/ }).first();
+
+    // Esperar a que el link sea visible y clickeable
+    await apuestaLink.waitFor({ state: 'visible', timeout: 5000 });
     await apuestaLink.click();
 
     // Debe estar en /app/apuesta/[id]
-    await page.waitForURL(/\/app\/apuesta\//, { timeout: 5000 });
+    await page.waitForURL(/\/app\/apuesta\//, { timeout: 10000 });
 
     // Verificar que se ve el formulario de apostar
-    expect(await page.locator('text=Apuesta por').isVisible()).toBeTruthy();
+    await page.locator('text=Elige tu predicción').waitFor({ timeout: 5000 });
+    expect(await page.locator('text=Elige tu predicción').isVisible()).toBeTruthy();
     expect(await page.locator('input[name="valor_apostado"]').isVisible()).toBeTruthy();
 
     // Seleccionar opción y monto

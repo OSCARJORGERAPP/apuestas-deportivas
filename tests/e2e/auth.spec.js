@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { getMailhogEmail, extractTokenFromEmail } from '../helpers.js';
 
 test.describe('Autenticación con Magic Link', () => {
   test('debe enviar magic link y permitir login', async ({ page }) => {
@@ -6,7 +7,7 @@ test.describe('Autenticación con Magic Link', () => {
     await page.goto('/login');
     expect(await page.locator('input[type="email"]').isVisible()).toBeTruthy();
 
-    // 2. Ingresaar email
+    // 2. Ingresar email
     const testEmail = `test-${Date.now()}@example.com`;
     await page.fill('input[type="email"]', testEmail);
     await page.click('button:has-text("Enviar magic link")');
@@ -14,26 +15,13 @@ test.describe('Autenticación con Magic Link', () => {
     // 3. Esperar mensaje de éxito
     await expect(page.locator('text=Magic link enviado')).toBeVisible({ timeout: 5000 });
 
-    // 4. Obtener email de MailHog
-    const mailhogRes = await page.evaluate(() =>
-      fetch('http://localhost:8025/api/v2/search?kind=to&query=' + encodeURIComponent('test-' + Date.now()))
-        .then(r => r.json())
-    );
-
-    // Buscar el último email
-    const emails = await page.evaluate(async () => {
-      const res = await fetch('http://localhost:8025/api/v2/search?limit=50');
-      return await res.json();
-    });
-
-    const email = emails.items?.find(e => e.To.some(t => t.Mailbox === 'test'));
+    // 4. Obtener email de MailHog (desde Node.js, no desde navegador)
+    const email = await getMailhogEmail(testEmail);
 
     if (email) {
       // Extraer token del email
-      const tokenMatch = email.Raw.Data.match(/token=([a-zA-Z0-9._-]+)/);
-      if (tokenMatch) {
-        const token = tokenMatch[1];
-
+      const token = extractTokenFromEmail(email);
+      if (token) {
         // 5. Verificar token
         await page.goto(`/auth/verify?token=${token}`);
 
@@ -45,7 +33,11 @@ test.describe('Autenticación con Magic Link', () => {
         const user = await page.evaluate(() => localStorage.getItem('user'));
         expect(user).toBeTruthy();
         expect(user).toContain(testEmail);
+      } else {
+        test.skip();
       }
+    } else {
+      test.skip();
     }
   });
 

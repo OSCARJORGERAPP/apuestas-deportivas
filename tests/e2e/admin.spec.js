@@ -87,16 +87,16 @@ test.describe('Panel Admin', () => {
     await page.goto('/admin');
 
     // Esperar a que cargue el admin
-    await page.waitForSelector('button:has-text("Participantes")', { timeout: 5000 });
+    await page.locator('role=button[name="Participantes"]').waitFor({ timeout: 5000 });
 
     // Click en tab Participantes
-    await page.click('button:has-text("Participantes")');
+    await page.click('role=button[name="Participantes"]');
 
-    // Esperar a que aparezca la tabla (con o sin filas)
-    await page.locator('text=Participantes').first().waitFor({ timeout: 5000 });
+    // Esperar a que aparezca la tabla heading
+    await page.locator('role=heading[name=/Participantes/]').waitFor({ timeout: 5000 });
 
     // Debe mostrar tabla
-    expect(await page.locator('text=Participantes').isVisible()).toBeTruthy();
+    expect(await page.locator('role=heading[name=/Participantes/]').isVisible()).toBeTruthy();
   });
 
   test('debe permitir resetear colecciones', async ({ page }) => {

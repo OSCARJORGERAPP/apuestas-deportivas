@@ -12,13 +12,9 @@
 # Error details
 
 ```
-Test timeout of 30000ms exceeded.
-```
-
-```
-Error: locator.click: Test timeout of 30000ms exceeded.
+TimeoutError: locator.waitFor: Timeout 5000ms exceeded.
 Call log:
-  - waiting for locator('a').filter({ hasText: /vs/ }).first()
+  - waiting for locator('a').filter({ hasText: /vs/ }).first() to be visible
 
 ```
 
@@ -79,7 +75,7 @@ Call log:
                     - paragraph [ref=e53]: Recaudación
                     - paragraph [ref=e54]: $0
                 - link "Ver detalles" [ref=e55] [cursor=pointer]:
-                  - /url: /app/apuesta/6a3c6d73e0fec8cf00501d0a
+                  - /url: /app/apuesta/6a3c6fe7c5adbac1151448c6
                   - button "Ver detalles" [ref=e56]
               - generic [ref=e58]:
                 - generic [ref=e59]:
@@ -95,7 +91,7 @@ Call log:
                     - paragraph [ref=e69]: Recaudación
                     - paragraph [ref=e70]: $0
                 - link "Ver detalles" [ref=e71] [cursor=pointer]:
-                  - /url: /app/apuesta/6a3c6d73e0fec8cf00501d0b
+                  - /url: /app/apuesta/6a3c6fe7c5adbac1151448c7
                   - button "Ver detalles" [ref=e72]
               - generic [ref=e74]:
                 - generic [ref=e75]:
@@ -111,7 +107,7 @@ Call log:
                     - paragraph [ref=e85]: Recaudación
                     - paragraph [ref=e86]: $0
                 - link "Ver detalles" [ref=e87] [cursor=pointer]:
-                  - /url: /app/apuesta/6a3c6d73e0fec8cf00501d0c
+                  - /url: /app/apuesta/6a3c6fe7c5adbac1151448c8
                   - button "Ver detalles" [ref=e88]
           - generic [ref=e90]:
             - heading "Mis apuestas" [level=3] [ref=e91]
@@ -122,16 +118,16 @@ Call log:
                   - columnheader "Predicción" [ref=e97]
                   - columnheader "Monto" [ref=e98]
               - rowgroup [ref=e99]:
-                - row "6a3c6d73 equipo1 $100" [ref=e100]:
-                  - cell "6a3c6d73" [ref=e101]
+                - row "6a3c6fe7 equipo1 $100" [ref=e100]:
+                  - cell "6a3c6fe7" [ref=e101]
                   - cell "equipo1" [ref=e102]
                   - cell "$100" [ref=e103]
-                - row "6a3c6d73 equipo2 $50" [ref=e104]:
-                  - cell "6a3c6d73" [ref=e105]
+                - row "6a3c6fe7 equipo2 $50" [ref=e104]:
+                  - cell "6a3c6fe7" [ref=e105]
                   - cell "equipo2" [ref=e106]
                   - cell "$50" [ref=e107]
-                - row "6a3c6d73 equipo1 $60" [ref=e108]:
-                  - cell "6a3c6d73" [ref=e109]
+                - row "6a3c6fe7 equipo1 $60" [ref=e108]:
+                  - cell "6a3c6fe7" [ref=e109]
                   - cell "equipo1" [ref=e110]
                   - cell "$60" [ref=e111]
   - button "Open Next.js Dev Tools" [ref=e117] [cursor=pointer]:
@@ -162,73 +158,81 @@ Call log:
   18 | 
   19 |   test('debe ver detalle de apuesta y opciones de apostar', async ({ page, context }) => {
   20 |     // Setup: loguear
-  21 |     await page.goto('/');
-  22 |     const user = { id: '507f1f77bcf86cd799439011', email: 'test@example.com', role: 'participant' };
-  23 |     await page.evaluate((u) => localStorage.setItem('user', JSON.stringify(u)), user);
-  24 | 
-  25 |     // Configurar cookie de autenticación para API endpoints
-  26 |     await context.addCookies([
-  27 |       {
-  28 |         name: 'auth_token',
-  29 |         value: 'dummy-token-for-testing',
-  30 |         url: 'http://localhost:3000',
-  31 |       },
-  32 |     ]);
-  33 | 
-  34 |     // Ir a /app
-  35 |     await page.goto('/app');
-  36 | 
-  37 |     // Hacer click en una apuesta
-  38 |     const apuestaLink = page.locator('a').filter({ hasText: /vs/ }).first();
-> 39 |     await apuestaLink.click();
-     |                       ^ Error: locator.click: Test timeout of 30000ms exceeded.
+  21 |     await seedTestData();
+  22 |     await page.goto('/');
+  23 |     const user = { id: '507f1f77bcf86cd799439011', email: 'test@example.com', role: 'participant' };
+  24 |     await page.evaluate((u) => localStorage.setItem('user', JSON.stringify(u)), user);
+  25 | 
+  26 |     // Configurar cookie de autenticación para API endpoints
+  27 |     await context.addCookies([
+  28 |       {
+  29 |         name: 'auth_token',
+  30 |         value: 'dummy-token-for-testing',
+  31 |         url: 'http://localhost:3000',
+  32 |       },
+  33 |     ]);
+  34 | 
+  35 |     // Ir a /app
+  36 |     await page.goto('/app');
+  37 | 
+  38 |     // Esperar a que carguen las apuestas
+  39 |     await page.locator('text=/vs/').first().waitFor({ timeout: 5000 });
   40 | 
-  41 |     // Debe estar en /app/apuesta/[id]
-  42 |     await page.waitForURL(/\/app\/apuesta\//, { timeout: 5000 });
+  41 |     // Buscar un enlace que navegue a una apuesta
+  42 |     const apuestaLink = page.locator('a').filter({ hasText: /vs/ }).first();
   43 | 
-  44 |     // Verificar que se ve el formulario de apostar
-  45 |     expect(await page.locator('text=Apuesta por').isVisible()).toBeTruthy();
-  46 |     expect(await page.locator('input[name="valor_apostado"]').isVisible()).toBeTruthy();
+  44 |     // Esperar a que el link sea visible y clickeable
+> 45 |     await apuestaLink.waitFor({ state: 'visible', timeout: 5000 });
+     |                       ^ TimeoutError: locator.waitFor: Timeout 5000ms exceeded.
+  46 |     await apuestaLink.click();
   47 | 
-  48 |     // Seleccionar opción y monto
-  49 |     await page.click('input[value="equipo1"]');
-  50 |     await page.fill('input[name="valor_apostado"]', '50');
-  51 | 
-  52 |     // Click en botón apostar
-  53 |     await page.click('button:has-text("Apostar")');
-  54 | 
-  55 |     // Esperar confirmación (debería aparecer en la tabla)
-  56 |     await expect(page.locator('text=equipo1')).toBeVisible({ timeout: 5000 });
-  57 |   });
-  58 | 
-  59 |   test('no debe permitir apostar en apuesta cerrada', async ({ page, context }) => {
-  60 |     await page.goto('/');
-  61 |     const user = { id: '507f1f77bcf86cd799439011', email: 'test@example.com', role: 'participant' };
-  62 |     await page.evaluate((u) => localStorage.setItem('user', JSON.stringify(u)), user);
-  63 | 
-  64 |     // Configurar cookie de autenticación para API endpoints
-  65 |     await context.addCookies([
-  66 |       {
-  67 |         name: 'auth_token',
-  68 |         value: 'dummy-token-for-testing',
-  69 |         url: 'http://localhost:3000',
-  70 |       },
-  71 |     ]);
-  72 | 
-  73 |     // Ir a /app
-  74 |     await page.goto('/app');
-  75 | 
-  76 |     // Buscar apuesta cerrada
-  77 |     const cerradalink = page.locator('button:has-text("Cerrada")').first().locator('..').locator('a').first();
-  78 | 
-  79 |     if (await cerradalink.isVisible()) {
-  80 |       await cerradalink.click();
-  81 | 
-  82 |       // Botón apostar debe estar disabled
-  83 |       const apostarBtn = page.locator('button:has-text("Apostar")');
-  84 |       expect(await apostarBtn.isDisabled()).toBeTruthy();
-  85 |     }
-  86 |   });
-  87 | });
-  88 | 
+  48 |     // Debe estar en /app/apuesta/[id]
+  49 |     await page.waitForURL(/\/app\/apuesta\//, { timeout: 10000 });
+  50 | 
+  51 |     // Verificar que se ve el formulario de apostar
+  52 |     await page.locator('text=Elige tu predicción').waitFor({ timeout: 5000 });
+  53 |     expect(await page.locator('text=Elige tu predicción').isVisible()).toBeTruthy();
+  54 |     expect(await page.locator('input[name="valor_apostado"]').isVisible()).toBeTruthy();
+  55 | 
+  56 |     // Seleccionar opción y monto
+  57 |     await page.click('input[value="equipo1"]');
+  58 |     await page.fill('input[name="valor_apostado"]', '50');
+  59 | 
+  60 |     // Click en botón apostar
+  61 |     await page.click('button:has-text("Apostar")');
+  62 | 
+  63 |     // Esperar confirmación (debería aparecer en la tabla)
+  64 |     await expect(page.locator('text=equipo1')).toBeVisible({ timeout: 5000 });
+  65 |   });
+  66 | 
+  67 |   test('no debe permitir apostar en apuesta cerrada', async ({ page, context }) => {
+  68 |     await page.goto('/');
+  69 |     const user = { id: '507f1f77bcf86cd799439011', email: 'test@example.com', role: 'participant' };
+  70 |     await page.evaluate((u) => localStorage.setItem('user', JSON.stringify(u)), user);
+  71 | 
+  72 |     // Configurar cookie de autenticación para API endpoints
+  73 |     await context.addCookies([
+  74 |       {
+  75 |         name: 'auth_token',
+  76 |         value: 'dummy-token-for-testing',
+  77 |         url: 'http://localhost:3000',
+  78 |       },
+  79 |     ]);
+  80 | 
+  81 |     // Ir a /app
+  82 |     await page.goto('/app');
+  83 | 
+  84 |     // Buscar apuesta cerrada
+  85 |     const cerradalink = page.locator('button:has-text("Cerrada")').first().locator('..').locator('a').first();
+  86 | 
+  87 |     if (await cerradalink.isVisible()) {
+  88 |       await cerradalink.click();
+  89 | 
+  90 |       // Botón apostar debe estar disabled
+  91 |       const apostarBtn = page.locator('button:has-text("Apostar")');
+  92 |       expect(await apostarBtn.isDisabled()).toBeTruthy();
+  93 |     }
+  94 |   });
+  95 | });
+  96 | 
 ```

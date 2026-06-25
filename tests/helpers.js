@@ -82,3 +82,35 @@ export async function cleanTestData() {
     db.collection('ganadores').deleteMany({}),
   ]);
 }
+
+export async function getMailhogEmail(toEmail, maxRetries = 10) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(
+        `http://localhost:8025/api/v2/search?limit=50&kind=to&query=${encodeURIComponent(toEmail)}`
+      );
+      if (!response.ok) throw new Error(`Status ${response.status}`);
+
+      const data = await response.json();
+      if (data.items && data.items.length > 0) {
+        return data.items[0];
+      }
+    } catch (error) {
+      if (i < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        continue;
+      }
+    }
+  }
+  return null;
+}
+
+export function extractTokenFromEmail(emailData) {
+  if (!emailData || !emailData.Raw || !emailData.Raw.Data) {
+    return null;
+  }
+  // JWT tokens tienen 3 partes separadas por puntos: header.payload.signature
+  // Buscar el token en el formato token=...
+  const tokenMatch = emailData.Raw.Data.match(/token=([a-zA-Z0-9._\-]+(?:\.[a-zA-Z0-9._\-]+)*)/);
+  return tokenMatch ? tokenMatch[1] : null;
+}
