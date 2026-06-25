@@ -39,6 +39,7 @@ test:
     MAILHOG_HOST: "mailhog"
     MAILHOG_PORT: "1025"
   script:
+    - npx playwright install
     - npm run test
   cache:
     paths:
