@@ -200,12 +200,17 @@ Elegimos redondear. En producción, esto se auditaría.
 - ✨ Tests E2E detectaron bugs temprano
 - ✨ Pipeline CI/CD automatizado desde día 1
 - ✨ Documentación completa facilita onboarding
+- ✨ Flujo de pago REDSYS implementado y testeado
+- ✨ Error logging y debugging mejorados para facilitar troubleshooting
+- ✨ Validaciones de negocio (ej: no apostar 2x en misma apuesta)
 
 ### Lo que mejoraría
 - 💭 Más validación de schema desde el inicio
 - 💭 Audit trail desde el principio (no después)
 - 💭 Load testing en staging (no solo en prod)
 - 💭 Más granular control de permisos (RBAC vs role simple)
+- 💭 UI/UX: agregar confirmaciones en formularios críticos (ej: Apostar)
+- 💭 REDSYS: implementar cifrado real en lugar de placeholder para pruebas
 
 ### Sostenibilidad
 Este proyecto está **production-ready con caveats**:
@@ -219,7 +224,7 @@ Este proyecto está **production-ready con caveats**:
 
 ---
 
-**Fecha de cierre:** 2026-06-22  
-**Duración total:** 1 día (5 fases: estructura → backend → frontend → tests → docs)  
+**Fecha de cierre:** 2026-06-25  
+**Duración total:** 2 días (5 fases: estructura → backend → frontend → tests → docs → REDSYS)  
 **Equipo:** 1 developer + 1 AI (Claude)  
-**Status:** ✅ MVP completo, pronto a staging
+**Status:** ✅ MVP completo + REDSYS funcional, testeado localmente, listo para staging

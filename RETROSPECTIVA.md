@@ -103,10 +103,62 @@ Registro de incidentes encontrados durante el desarrollo y sus soluciones.
 
 ---
 
+### 2026-06-25 — ObjectId de Mongoose no se serializa en JSON
+
+**Síntoma**: Flujo de pago REDSYS fallaba con "Apuesta no encontrada" aunque la apuesta existía en BD
+
+**Causa raíz**: Al guardar `apuesta._id` en sessionStorage vía JSON.stringify, el ObjectId de Mongoose no se serializa correctamente. Se perdía el valor y se enviaba un objeto vacío al callback.
+
+**Solución aplicada**: 
+1. En BetForm.jsx, convertir ObjectIds a strings: `apuesta._id.toString ? apuesta._id.toString() : apuesta._id`
+2. En callback, recibir strings y convertirlos a ObjectId: `new ObjectId(id_apuesta)`
+3. Validar que los strings sean ObjectIds válidos antes de usar
+
+**Aprendizaje**: Cuando se serializa data de Mongoose/MongoDB, siempre convertir ObjectIds a strings explícitamente. JSON.stringify no maneja tipos complejos bien.
+
+**Ticket/PR**: commit 1614a76
+
+---
+
+### 2026-06-25 — Errores en flujo de pago desaparecían en consola
+
+**Síntoma**: El usuario reportaba que el pago fallaba pero el error se perdía al redirigir a /pagos/error
+
+**Causa raíz**: Los errores se loguean en consola pero desaparecen cuando se hace `window.location.href`, porque el navegador descarga la nueva página y la consola se limpia.
+
+**Solución aplicada**:
+1. Guardar error en `sessionStorage.setItem('paymentError', errorMsg)`
+2. En página de error, leer sessionStorage y mostrar el error
+3. Agregar logs detallados con emojis en consola ANTES de redirigir
+4. Mostrar error en página con fondo amarillo para visibility
+
+**Aprendizaje**: En SPAs con navegación, guardar estado crítico en sessionStorage. Los logs en consola se pierden al cambiar de página.
+
+**Ticket/PR**: commit 70c73cc
+
+---
+
+### 2026-06-25 — Validación de apuestas duplicadas en callback
+
+**Síntoma**: Usuario intenta apostar 2 veces en la misma apuesta, el sistema lo rechazaba correctamente pero sin mensaje claro
+
+**Causa raíz**: La validación existía en callback pero el error era genérico
+
+**Solución aplicada**:
+1. El callback ya validaba con `findOne()` para ver si existe apuesta anterior
+2. Se retornaba error 400 "Ya apostaste en esta apuesta"
+3. El error logging mejorado ahora lo muestra claramente en página de error
+
+**Aprendizaje**: Validaciones de negocio deben ser claras. Un error 400 con mensaje genérico confunde al usuario. Ahora muestra exactamente qué está mal.
+
+**Ticket/PR**: commit 1f7f2c3 (REDSYS feature)
+
+---
+
 ## Estadísticas
 
-- **Total de incidentes**: 6
-- **Resueltos**: 6
+- **Total de incidentes**: 9
+- **Resueltos**: 9
 - **Pendientes**: 0
 - **Tiempo promedio de resolución**: < 15 minutos
 
@@ -116,6 +168,8 @@ Registro de incidentes encontrados durante el desarrollo y sus soluciones.
 |---|---|---|
 | Config/compatibilidad | 2 | Cambios entre versiones mayores |
 | Tests | 2 | Timing/async issues |
+| Serialización/JSON | 2 | ObjectId de Mongoose no se serializa |
+| Integración de pagos | 2 | REDSYS flow (error logging, duplicados) |
 | Lógica de negocio | 1 | Cálculos de dinero |
 | Seguridad | 1 | Falta de validación servidor |
 
