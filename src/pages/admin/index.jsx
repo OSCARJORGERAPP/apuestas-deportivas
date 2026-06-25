@@ -14,6 +14,8 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('apuestas');
   const [resultadoForm, setResultadoForm] = useState({ id: '', resultado: 'equipo1' });
+  const [resultadoStatus, setResultadoStatus] = useState('');
+  const [resultadoError, setResultadoError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -67,6 +69,8 @@ export default function AdminPanel() {
 
   const handleSetResultado = async (e) => {
     e.preventDefault();
+    setResultadoStatus('');
+    setResultadoError('');
 
     try {
       const res = await fetch(`/api/apuestas/${resultadoForm.id}/resultado`, {
@@ -76,13 +80,18 @@ export default function AdminPanel() {
         body: JSON.stringify({ resultado: resultadoForm.resultado }),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
-        alert('Resultado establecido');
+        setResultadoStatus(`✅ Resultado establecido. ${data.cantidad_ganadores} ganadores.`);
         setResultadoForm({ id: '', resultado: 'equipo1' });
-        router.replace(router.asPath);
+        setTimeout(() => router.replace(router.asPath), 1500);
+      } else {
+        setResultadoError(data.error || 'Error al establecer resultado');
       }
     } catch (error) {
       console.error('Error setting resultado:', error);
+      setResultadoError(error.message || 'Error desconocido');
     }
   };
 
@@ -195,7 +204,7 @@ export default function AdminPanel() {
                         required
                       >
                         <option value="">— Elige una apuesta —</option>
-                        {apuestas.map((a) => (
+                        {apuestas.filter(a => a.estado === 'abierta').map((a) => (
                           <option key={a._id} value={a._id}>
                             {a.equipo1} vs {a.equipo2}
                           </option>
@@ -216,6 +225,18 @@ export default function AdminPanel() {
                       </select>
                     </div>
                   </div>
+
+                  {resultadoStatus && (
+                    <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg text-sm">
+                      {resultadoStatus}
+                    </div>
+                  )}
+
+                  {resultadoError && (
+                    <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg text-sm">
+                      {resultadoError}
+                    </div>
+                  )}
 
                   <Button type="submit" variant="primary">
                     Establecer resultado

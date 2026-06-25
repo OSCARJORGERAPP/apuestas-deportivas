@@ -89,7 +89,7 @@ async function setResultado(req, res) {
       apuesta_id: id,
       resultado,
       recaudacion_total: totalRecaudacion,
-      cantidad_ganadores: conteoGanadores,
+      cantidad_ganadores: ganadoresArray.length,
       ganadores,
     });
   } catch (error) {

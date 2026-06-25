@@ -27,6 +27,7 @@ export default function ApuestaForm({ onSuccess }) {
       const res = await fetch('/api/apuestas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           equipo1: formData.equipo1,
           equipo2: formData.equipo2,
