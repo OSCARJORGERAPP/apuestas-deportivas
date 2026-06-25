@@ -129,7 +129,7 @@ export function extractTokenFromEmail(emailData) {
   // Buscar patrones JWT: eyJ...eyJ... (tres partes separadas por puntos)
   // Los JWTs empiezan típicamente con "eyJ" (base64 para "{")
   // Buscar: eyJ seguido de caracteres, punto, más caracteres, punto, más caracteres
-  const jwtPatterns = bodyText.match(/eyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+/g);
+  const jwtPatterns = bodyText.match(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g);
 
   if (jwtPatterns && jwtPatterns.length > 0) {
     // Tomar el último JWT encontrado (más probable que sea el actual)
