@@ -94,7 +94,8 @@ Verás:
 ### Como **Admin:**
 
 1. Abre DevTools (F12) → Console
-2. Ejecuta:
+2. El navegador pedirá seguridad - escribe: `allow pasting` y presiona **Enter**
+3. Copia y pega este código:
    ```javascript
    localStorage.setItem('user', JSON.stringify({
      id: '507f1f77bcf86cd799439012',
@@ -102,12 +103,13 @@ Verás:
      role: 'admin'
    }))
    ```
-3. **⚠️ IMPORTANTE:** Presiona `Ctrl+R` o `Cmd+R` para **RECARGAR la página**
-4. Cierra DevTools (F12)
-5. Click **"Admin"** en navbar (ahora visible) - deberías ver el enlace Admin
-6. **Tab Apuestas:** crea nueva apuesta
-7. **Tab Acciones:** selecciona una apuesta y establece resultado (ej. "equipo1 ganó")
-8. ¡Los ganadores se calcularán automáticamente!
+4. Presiona **Enter** para ejecutar
+5. **⚠️ IMPORTANTE:** Presiona `Ctrl+R` (o `Cmd+R` en Mac) para **RECARGAR la página**
+6. Cierra DevTools (F12)
+7. Click **"Admin"** en navbar (ahora visible)
+8. **Tab Apuestas:** crea nueva apuesta
+9. **Tab Acciones:** selecciona una apuesta y establece resultado (ej. "equipo1 ganó")
+10. ¡Los ganadores se calcularán automáticamente!
 
 ## 🧪 Tests
 
