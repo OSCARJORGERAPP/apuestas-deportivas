@@ -38,6 +38,13 @@ export default function PagoREDSYS() {
 
   const handleConfirmPayment = async () => {
     try {
+      console.log('📝 Datos a enviar:', {
+        id_apuesta: paymentData.id_apuesta,
+        id_participante: paymentData.id_participante,
+        prediccion: paymentData.prediccion,
+        orden_id: paymentData.orden_id,
+      });
+
       // En modo prueba, llamar directamente al callback
       const res = await fetch('/api/pagos/callback', {
         method: 'POST',
@@ -51,16 +58,23 @@ export default function PagoREDSYS() {
       });
 
       const data = await res.json();
+      console.log('📡 Respuesta del servidor:', { status: res.status, data });
 
       if (!res.ok) {
-        console.error('Error del servidor:', data);
-        throw new Error(data.error || 'Error procesando pago');
+        const errorMsg = data.error || 'Error procesando pago';
+        console.error('❌ Error del servidor:', errorMsg);
+        // Guardar error para mostrarlo en página de error
+        sessionStorage.setItem('paymentError', errorMsg);
+        window.location.href = '/pagos/error';
+        return;
       }
 
+      console.log('✅ Pago exitoso');
       // Ir a página de éxito
       window.location.href = '/pagos/exito';
     } catch (error) {
-      console.error('Error:', error);
+      console.error('❌ Error de cliente:', error.message);
+      sessionStorage.setItem('paymentError', error.message);
       window.location.href = '/pagos/error';
     }
   };
