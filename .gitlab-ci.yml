@@ -31,7 +31,7 @@ lint:
 
 test:
   stage: test
-  image: node:20
+  image: mcr.microsoft.com/playwright:v1.46.0-noble
   services:
     - mongo:7
   variables:
@@ -39,7 +39,7 @@ test:
     MAILHOG_HOST: "mailhog"
     MAILHOG_PORT: "1025"
   script:
-    - npx playwright install
+    - npm ci
     - npm run test
   cache:
     paths:
