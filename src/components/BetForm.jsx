@@ -22,7 +22,8 @@ export default function BetForm({ apuesta, participantId, onSuccess }) {
     setError('');
 
     try {
-      const res = await fetch('/api/valores', {
+      // Iniciar pago REDSYS
+      const res = await fetch('/api/pagos/iniciar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -34,11 +35,21 @@ export default function BetForm({ apuesta, participantId, onSuccess }) {
       });
 
       if (!res.ok) {
-        throw new Error('Error registrando apuesta');
+        throw new Error('Error iniciando pago');
       }
 
-      setFormData({ prediccion: 'equipo1' });
-      if (onSuccess) onSuccess();
+      const data = await res.json();
+
+      // Guardar datos de pago en sessionStorage y redirigir
+      sessionStorage.setItem('paymentData', JSON.stringify({
+        orden_id: data.orden_id,
+        id_apuesta: apuesta._id,
+        id_participante: participantId,
+        prediccion: formData.prediccion,
+        monto: data.monto,
+      }));
+
+      window.location.href = '/pagos';
     } catch (err) {
       setError(err.message);
     } finally {

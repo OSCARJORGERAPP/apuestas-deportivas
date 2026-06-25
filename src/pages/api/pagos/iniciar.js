@@ -1,4 +1,6 @@
 import { requireAuth } from '../../../lib/auth';
+import { connectToDatabase } from '../../../lib/db';
+import { ObjectId } from 'mongodb';
 
 async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -9,33 +11,48 @@ async function handler(req, res) {
 }
 
 async function iniciarPago(req, res) {
-  const { monto, orden_id, descripcion } = req.body;
+  const { id_apuesta, id_participante, prediccion } = req.body;
 
-  if (!monto || !orden_id) {
-    return res.status(400).json({ error: 'Monto u orden_id faltante' });
+  if (!id_apuesta || !id_participante || !prediccion) {
+    return res.status(400).json({ error: 'Datos incompletos' });
   }
 
   try {
-    // TODO: Generar parámetros cifrados de REDSYS
-    // Por ahora, retornar un formulario simplificado para pruebas
+    const { db } = await connectToDatabase();
 
-    const redsysForm = {
-      Ds_Merchant_MerchantCode: process.env.REDSYS_MERCHANT_CODE || '999008881',
-      Ds_Merchant_TerminalId: process.env.REDSYS_TERMINAL_ID || '1',
-      Ds_Merchant_Order: orden_id,
-      Ds_Merchant_Amount: Math.round(monto * 100).toString(),
-      Ds_Merchant_Currency: '978', // EUR
-      Ds_Merchant_TransactionType: '0', // Compra
-      Ds_Merchant_ProductDescription: descripcion || 'Apuesta deportiva',
-      Ds_Merchant_ConsumerLanguage: '001', // ES
-      Ds_Merchant_UrlOk: `${process.env.APP_URL}/pagos/exito`,
-      Ds_Merchant_UrlKo: `${process.env.APP_URL}/pagos/error`,
+    // Obtener apuesta para saber el monto
+    const apuesta = await db.collection('apuestas').findOne({ _id: new ObjectId(id_apuesta) });
+    if (!apuesta) {
+      return res.status(404).json({ error: 'Apuesta no encontrada' });
+    }
+
+    // Generar orden única
+    const timestamp = Date.now().toString().slice(-6);
+    const orden_id = `${apuesta.indice}${timestamp}`;
+
+    // En modo prueba, retornar parámetros REDSYS sin cifrado real
+    const redsysParams = {
+      DS_MERCHANT_MerchantCode: process.env.REDSYS_MERCHANT_CODE || '999008881',
+      DS_MERCHANT_Terminal: process.env.REDSYS_TERMINAL_ID || '1',
+      DS_MERCHANT_Order: orden_id,
+      DS_MERCHANT_Amount: Math.round(apuesta.valor * 100),
+      DS_MERCHANT_Currency: '978',
+      DS_MERCHANT_TransactionType: '0',
+      DS_MERCHANT_ProductDescription: `${apuesta.equipo1} vs ${apuesta.equipo2}`,
+      DS_MERCHANT_ConsumerLanguage: '001',
+      DS_MERCHANT_UrlOk: `${process.env.APP_URL}/pagos/exito`,
+      DS_MERCHANT_UrlKo: `${process.env.APP_URL}/pagos/error`,
     };
 
     return res.status(200).json({
-      message: 'Formulario REDSYS listo',
-      redsysForm,
-      // TODO: En producción, cifrar con algoritmo REDSYS
+      message: 'Pago iniciado',
+      orden_id,
+      monto: apuesta.valor,
+      redsysParams,
+      // Datos necesarios para callback
+      id_apuesta,
+      id_participante,
+      prediccion,
     });
   } catch (error) {
     console.error('Error iniciar pago:', error);
