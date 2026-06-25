@@ -43,8 +43,8 @@ export default function BetForm({ apuesta, participantId, onSuccess }) {
       // Guardar datos de pago en sessionStorage y redirigir
       sessionStorage.setItem('paymentData', JSON.stringify({
         orden_id: data.orden_id,
-        id_apuesta: apuesta._id,
-        id_participante: participantId,
+        id_apuesta: apuesta._id.toString ? apuesta._id.toString() : apuesta._id,
+        id_participante: participantId.toString ? participantId.toString() : participantId,
         prediccion: formData.prediccion,
         monto: data.monto,
       }));

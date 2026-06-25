@@ -50,8 +50,11 @@ export default function PagoREDSYS() {
         }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        throw new Error('Error procesando pago');
+        console.error('Error del servidor:', data);
+        throw new Error(data.error || 'Error procesando pago');
       }
 
       // Ir a página de éxito
