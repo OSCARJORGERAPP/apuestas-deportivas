@@ -102,11 +102,12 @@ Verás:
      role: 'admin'
    }))
    ```
-3. Recarga la página
-4. Click **"Admin"** en navbar (ahora visible)
-5. **Tab Apuestas:** crea nueva apuesta
-6. **Tab Acciones:** selecciona una apuesta y establece resultado (ej. "equipo1 ganó")
-7. ¡Los ganadores se calcularán automáticamente!
+3. **⚠️ IMPORTANTE:** Presiona `Ctrl+R` o `Cmd+R` para **RECARGAR la página**
+4. Cierra DevTools (F12)
+5. Click **"Admin"** en navbar (ahora visible) - deberías ver el enlace Admin
+6. **Tab Apuestas:** crea nueva apuesta
+7. **Tab Acciones:** selecciona una apuesta y establece resultado (ej. "equipo1 ganó")
+8. ¡Los ganadores se calcularán automáticamente!
 
 ## 🧪 Tests
 
