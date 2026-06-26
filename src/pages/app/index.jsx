@@ -130,12 +130,13 @@ export default function Dashboard() {
         {ganancias.length > 0 && (
           <Card>
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-6">🏆 Mis ganancias</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-6">🏆 Ganadores</h3>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
                       <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Apuesta</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Email</th>
                       <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">Ganancia</th>
                     </tr>
                   </thead>
@@ -143,6 +144,7 @@ export default function Dashboard() {
                     {ganancias.map((g) => (
                       <tr key={g._id} className="hover:bg-green-50">
                         <td className="py-3 px-4 text-sm text-gray-700">{g.id_apuesta.toString().slice(0, 8)}</td>
+                        <td className="py-3 px-4 text-sm text-gray-600">{g.email}</td>
                         <td className="py-3 px-4 text-sm text-right font-bold text-green-600">${g.valor_ganado.toFixed(2)}</td>
                       </tr>
                     ))}

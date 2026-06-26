@@ -26,11 +26,33 @@ async function getGanadores(req, res) {
     }
 
     const { ObjectId } = await import('mongodb');
-    let query = { id_participante: new ObjectId(userId) };
+    let matchStage = { id_participante: new ObjectId(userId) };
     if (userRole === 'admin') {
-      query = {};
+      matchStage = {};
     }
-    const ganadores = await db.collection('ganadores').find(query).toArray();
+
+    const ganadores = await db.collection('ganadores').aggregate([
+      { $match: matchStage },
+      {
+        $lookup: {
+          from: 'participantes',
+          localField: 'id_participante',
+          foreignField: '_id',
+          as: 'participante',
+        },
+      },
+      {
+        $addFields: {
+          email: { $arrayElemAt: ['$participante.mail', 0] },
+        },
+      },
+      {
+        $project: {
+          participante: 0,
+        },
+      },
+    ]).toArray();
+
     return res.status(200).json(ganadores);
   } catch (error) {
     console.error('Error fetching ganadores:', error);

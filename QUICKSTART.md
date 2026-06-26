@@ -93,9 +93,10 @@ Verás:
 
 ### Como **Admin:**
 
-1. Abre DevTools (F12) → Console
-2. El navegador pedirá seguridad - escribe: `allow pasting` y presiona **Enter**
-3. Copia y pega este código (configura tanto localStorage como cookie):
+1. **⚠️ PRIMERO:** Haz click en **"Logout"** en el navbar (si estabas logeado como participante)
+2. Abre DevTools (F12) → Console
+3. El navegador pedirá seguridad - escribe: `allow pasting` y presiona **Enter**
+4. Copia y pega este código (configura tanto localStorage como cookie):
    ```javascript
    // Configurar usuario en localStorage
    localStorage.setItem('user', JSON.stringify({
@@ -107,13 +108,13 @@ Verás:
    // Configurar cookie de autenticación
    document.cookie = 'auth_token=dummy-token-for-testing; path=/; max-age=86400';
    ```
-4. Presiona **Enter** para ejecutar
-5. **⚠️ IMPORTANTE:** Presiona `Ctrl+R` (o `Cmd+R` en Mac) para **RECARGAR la página**
-6. Cierra DevTools (F12)
-7. Click **"Admin"** en navbar (ahora visible)
-8. **Tab Apuestas:** crea nueva apuesta
-9. **Tab Acciones:** selecciona una apuesta y establece resultado (ej. "equipo1 ganó")
-10. ¡Los ganadores se calcularán automáticamente!
+5. Presiona **Enter** para ejecutar
+6. **⚠️ IMPORTANTE:** Presiona `Ctrl+R` (o `Cmd+R` en Mac) para **RECARGAR la página**
+7. Cierra DevTools (F12)
+8. Click **"Admin"** en navbar (ahora visible)
+9. **Tab Apuestas:** crea nueva apuesta
+10. **Tab Acciones:** selecciona una apuesta y establece resultado (ej. "equipo1 ganó")
+11. ¡Los ganadores se calcularán automáticamente!
 
 ## 🧪 Tests
 
